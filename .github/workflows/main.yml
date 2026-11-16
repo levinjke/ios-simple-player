@@ -1,0 +1,21 @@
+name: Build IPA
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Xcode Project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build App
+        run: |
+          xcodebuild -project MyPlayer.xcodeproj -scheme MyPlayer -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR=build
+          mkdir -p Payload
+          cp -r build/MyPlayer.app Payload/
+          zip -r MyPlayer.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MyPlayer-IPA
+          path: MyPlayer.ipa
